@@ -1,35 +1,148 @@
 #include "raylib.h"
 
-#define SCREEN_WIDTH (800)
-#define SCREEN_HEIGHT (450)
+// --------------------------------------------------
+// Types and definitions
+// --------------------------------------------------
 
-#define WINDOW_TITLE "Window title"
+typedef enum GameScreen {
+  LOGO,
+  TITLE,
+  GAMEPLAY,
+  ENDING
+} GameScreen;
 
+// TODO: Define required structs
+
+// --------------------------------------------------
+// Program main entry point
+// --------------------------------------------------
 int main(void)
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE);
-    SetTargetFPS(60);
+  // Initializaton
+  // --------------------------------------------------
+  const int screenWidth = 800;
+  const int screenHeight = 450;
 
-    Texture2D texture = LoadTexture(ASSETS_PATH"test.png"); // Check README.md for how this works
+  InitWindow(screenWidth, screenHeight, "PROJECT: PONG");
 
-    while (!WindowShouldClose())
+  // TODO: load resources (textures, font, audio) after Window initialization
+
+  GameScreen screen = LOGO; // Current game state
+
+  int framesCounter = 0; // General purpose frames counter
+  int gameResult = -1;  // Game result: 0 - Loose, 1 - Win, -1 - Not Defined
+  bool gamePaused = false; // Game pause toggle state
+
+  // TODO: Define and Initialize game variables
+
+  SetTargetFPS(60); // Set Desired framerate (frames per seconds)
+  // --------------------------------------------------
+
+  // Main game loop
+  while (!WindowShouldClose()) // Detect window close button or ESC key
+  {
+    // Update
+    // --------------------------------------------------
+    switch(screen)
     {
-        BeginDrawing();
+      case LOGO:
+        {
+          // Update LOGO screen data here!
 
-        ClearBackground(RAYWHITE);
+          framesCounter++;
+          if (framesCounter > 180)
+          {
+            screen = TITLE; // Change to TITLE screen after 3 seconds
+            framesCounter = 0;
+          }
+        } break;
+      case TITLE:
+        {
+          // Update TITLE screen data here!
 
-        const int texture_x = SCREEN_WIDTH / 2 - texture.width / 2;
-        const int texture_y = SCREEN_HEIGHT / 2 - texture.height / 2;
-        DrawTexture(texture, texture_x, texture_y, WHITE);
+          framesCounter++;
+          // LESSON03: Inputs management (keyboard, mouse)
+          if (IsKeyPressed(KEY_ENTER))
+          {
+            screen = GAMEPLAY;
+          }
+        } break;
+      case GAMEPLAY:
+        {
+          // Update GAMEPLAY screen data here!
 
-        const char* text = "Hello World!";
-        const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
-        DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, texture_y + texture.height + text_size.y + 10, 20, BLACK);
+          if (!gamePaused)
+          {
+            // TODO: Gameplay Logic
+          }
 
-        EndDrawing();
+          // LESSON03: Inputs management (keyboard, mouse)
+          if (IsKeyPressed(KEY_ENTER))
+          {
+            screen = ENDING;
+          }
+        } break;
+      case ENDING:
+        {
+          // Update ENDING screen data here!
+
+          framesCounter++;
+          // LESSON03: Inputs management (keyboard, mouse)
+          if (IsKeyPressed(KEY_ENTER))
+          {
+            screen = TITLE;
+          }
+        } break;
+      default: break;
     }
+    // --------------------------------------------------
 
-    CloseWindow();
+    // Draw
+    // --------------------------------------------------
+    BeginDrawing();
+      ClearBackground(RAYWHITE);
+      switch(screen)
+      {
+        case LOGO:
+        {
+          // TODO: Draw LOGO screen here!
+          DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
+          DrawText("WAIT for 3 seconds...", 290, 220, 20, GRAY);
+        } break;
+        case TITLE:
+        {
+          // TODO: Draw TITLE screen here!
+          DrawRectangle(0, 0, screenWidth, screenHeight, GREEN);
+          DrawText("TITLE", 20, 20, 40, DARKGREEN);
+          DrawText("PRESS ENTER or TAP to JUMP to GAMEPLAY SCREEN", 120, 220, 20, DARKGREEN);
+        } break;
+        case GAMEPLAY:
+        {
+          // TODO: Draw GAMEPLAY screen here!
+          DrawRectangle(0, 0, screenWidth, screenHeight, PURPLE);
+          DrawText("GAMEPLAY", 20, 20, 40, MAROON);
+          DrawText("PRESS ENTER or TAP to JUMP to ENDING SCREEN", 120, 220, 20, MAROON);
+        } break;
+        case ENDING:
+        {
+          // TODO: Draw ENDING screen here!
+          DrawRectangle(0, 0, screenWidth, screenHeight, BLUE);
+          DrawText("ENDING", 20, 20, 40, DARKBLUE);
+          DrawText("Press Enter or TAP to RETURN to TITLE SCREEN", 120, 220, 20, DARKBLUE);
+        } break;
+        default: break;
+      }
+    EndDrawing();
+    // --------------------------------------------------
+  }
 
-    return 0;
+  // De-Initialization
+  // --------------------------------------------------
+
+  // NOTE: Unload any loaded resources (texture, fonts, audio)
+
+  CloseWindow(); // Close window and OpenGL context
+  // --------------------------------------------------
+
+  return 0;
 }
