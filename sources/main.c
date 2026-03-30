@@ -30,6 +30,7 @@ typedef struct Ball {
   Vector2 position;
   Vector2 speed;
   float radius;
+  bool active;
 } Ball;
 
 // --------------------------------------------------
@@ -39,8 +40,8 @@ int main(void)
 {
   // Initializaton
   // --------------------------------------------------
-  const int screenWidth = 800;
-  const int screenHeight = 450;
+  const int screenWidth = 1280;
+  const int screenHeight = 720;
 
   InitWindow(screenWidth, screenHeight, "PROJECT: PONG");
 
@@ -49,6 +50,7 @@ int main(void)
   GameScreen screen = LOGO; // Current game state
 
   int framesCounter = 0; // General purpose frames counter
+  int ballFramesCounter = 0; // Frames counter for the ball
   int gameResult = -1;  // Game result: 0 - Loose, 1 - Win, -1 - Not Defined
   bool gamePaused = false; // Game pause toggle state
 
@@ -70,8 +72,9 @@ int main(void)
 
   // Initialize ball
   ball.radius = 10.0f;
-  ball.position = (Vector2){ screenWidth / 2 - (ball.radius + 10), screenHeight / 2 };
-  ball.speed = (Vector2){ 4.0f, 4.0f };
+  ball.active = false;
+  ball.position = (Vector2){ screenWidth / 2 - ball.radius, screenHeight / 2 };
+  ball.speed = (Vector2){ 1.0f, 0 };
 
   SetTargetFPS(60); // Set Desired framerate (frames per seconds)
   // --------------------------------------------------
@@ -109,9 +112,88 @@ int main(void)
         {
           // Update GAMEPLAY screen data here!
 
+          if (IsKeyPressed('P'))
+          {
+            gamePaused = !gamePaused;
+          }
+
           if (!gamePaused)
           {
-            // TODO: Gameplay Logic
+            if (IsKeyDown(KEY_UP))
+            {
+              player1.position.y -= player1.speed.y;
+            }
+            if (IsKeyDown(KEY_DOWN))
+            {
+              player1.position.y += player1.speed.y;
+            }
+
+            if (player1.position.y <= 0)
+            {
+              player1.position.y = 0;
+            }
+            if (player1.position.y + player1.size.y >= screenHeight)
+            {
+              player1.position.y = screenHeight - player1.size.y;
+            }
+            player1.bounds = (Rectangle){ player1.position.x, player1.position.y, player1.size.x, player1.size.y };
+
+            if (ball.active)
+            {
+              ballFramesCounter = 0;
+              ball.position.x += ball.speed.x;
+              ball.position.y += ball.speed.y;
+
+              if ((ball.position.y + ball.radius) >= screenHeight || (ball.position.y - ball.radius) <= 0)
+              {
+                ball.speed.y *= -1;
+              }
+              if ((ball.position.x - ball.radius) <= 0)
+              {
+                ball.speed.x *= -1;
+              }
+
+              // TODO: Collision detection and resolution
+
+              // Game ending logic
+              if ((ball.position.x - ball.radius) <= 0 || (ball.position.x + ball.radius) >= screenWidth)
+              {
+                ball.speed = (Vector2){ 0, 0 };
+                ball.active = false;
+
+                if ((ball.position.x - ball.radius) <= 0)
+                {
+                  player2.score++;
+                }
+                else
+                {
+                  player1.score++;
+                }
+              }
+
+              if (player1.score >= 10 || player2.score >= 10)
+              {
+                screen = ENDING;
+                player1.score = 0;
+                player2.score = 0;
+                framesCounter = 0;
+              }
+            }
+            else
+            {
+              ballFramesCounter++;
+
+              // Reset ball position
+              ball.position.x = screenWidth / 2 - ball.radius;
+              ball.position.y = screenHeight / 2;
+
+              if (ballFramesCounter > 90)
+              {
+                // Activated ball
+                ball.active = true;
+                ball.speed = (Vector2){ -4.0f, 0 };
+              }
+            }
           }
         } break;
       case ENDING:
@@ -139,7 +221,10 @@ int main(void)
         {
           // TODO: Draw LOGO screen here!
           DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
-          DrawText("WAIT for 3 seconds...", 290, 220, 20, GRAY);
+          const char *waitText = "WAIT for 3 seconds...";
+          const int waitTextFontSize = 20;
+          DrawText(waitText, GetScreenWidth() / 2 - MeasureText(waitText, waitTextFontSize) / 2, 
+                   GetScreenHeight() / 2 + 60, waitTextFontSize, GRAY);
         } break;
         case TITLE:
         {
@@ -175,12 +260,13 @@ int main(void)
           // Draw GUI
           const char *scoreText = "%02i";
           const int scoreTextFontSize = 50;
+          const int scoreTextSpacing = 100;
 
           const char *scoreTextPlayer1 = TextFormat(scoreText, player1.score);
           const char *scoreTextPlayer2 = TextFormat(scoreText, player2.score);
-          DrawText(scoreTextPlayer1, (screenWidth / 2 - MeasureText(scoreTextPlayer1, scoreTextFontSize)) - 100, 
+          DrawText(scoreTextPlayer1, screenWidth / 2 - MeasureText(scoreTextPlayer1, scoreTextFontSize) - scoreTextSpacing,
                    50, scoreTextFontSize, BLACK);
-          DrawText(scoreTextPlayer2, screenWidth / 2 + 100, 50, scoreTextFontSize, BLACK);
+          DrawText(scoreTextPlayer2, screenWidth / 2 + scoreTextSpacing, 50, scoreTextFontSize, BLACK);
 
           if (gamePaused)
           {
