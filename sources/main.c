@@ -46,6 +46,7 @@ int main(void)
   InitWindow(screenWidth, screenHeight, "PROJECT: PONG");
 
   // TODO: load resources (textures, font, audio) after Window initialization
+  Texture2D texBall = LoadTexture(ASSETS_PATH"ball.png");
 
   GameScreen screen = LOGO; // Current game state
 
@@ -89,7 +90,6 @@ int main(void)
       case LOGO:
         {
           // Update LOGO screen data here!
-
           framesCounter++;
           if (framesCounter > 180)
           {
@@ -100,7 +100,6 @@ int main(void)
       case TITLE:
         {
           // Update TITLE screen data here!
-
           framesCounter++;
           // LESSON03: Inputs management (keyboard, mouse)
           if (IsKeyPressed(KEY_ENTER))
@@ -111,7 +110,6 @@ int main(void)
       case GAMEPLAY:
         {
           // Update GAMEPLAY screen data here!
-
           if (IsKeyPressed('P'))
           {
             gamePaused = !gamePaused;
@@ -153,7 +151,11 @@ int main(void)
                 ball.speed.x *= -1;
               }
 
-              // TODO: Collision detection and resolution
+              if (CheckCollisionCircleRec(ball.position, ball.radius, player1.bounds))
+              {
+                ball.speed.y = (ball.position.y - (player1.position.y + player1.size.y / 2)) / player1.size.y * 5.0f;
+                ball.speed.x *= -1;
+              }
 
               // Game ending logic
               if ((ball.position.x - ball.radius) <= 0 || (ball.position.x + ball.radius) >= screenWidth)
@@ -249,7 +251,7 @@ int main(void)
           // LESSON 02: Draw basic shapes (circle, rectangle)
           DrawRectangle(player1.position.x, player1.position.y, player1.size.x, player1.size.y, BLACK);
           DrawRectangle(player2.position.x, player2.position.y, player2.size.x, player2.size.y, BLACK);
-          DrawCircleV(ball.position, ball.radius, MAROON);
+          DrawTexture(texBall, ball.position.x - ball.radius / 2, ball.position.y - ball.radius / 2, WHITE);
 
           // Draw Net
           for (int i = 0; i < screenHeight; i = i + 20)
@@ -300,6 +302,7 @@ int main(void)
   // --------------------------------------------------
 
   // NOTE: Unload any loaded resources (texture, fonts, audio)
+  UnloadTexture(texBall);
 
   CloseWindow(); // Close window and OpenGL context
   // --------------------------------------------------
