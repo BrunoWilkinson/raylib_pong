@@ -46,6 +46,8 @@ int main(void)
   InitWindow(screenWidth, screenHeight, "PROJECT: PONG");
 
   // TODO: load resources (textures, font, audio) after Window initialization
+  Font font = LoadFont(ASSETS_PATH"setback.png");
+  Texture2D texLogo = LoadTexture(ASSETS_PATH"logo.png");
   Texture2D texBall = LoadTexture(ASSETS_PATH"ball.png");
 
   GameScreen screen = LOGO; // Current game state
@@ -221,18 +223,13 @@ int main(void)
       {
         case LOGO:
         {
-          // TODO: Draw LOGO screen here!
-          DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
-          const char *waitText = "WAIT for 3 seconds...";
-          const int waitTextFontSize = 20;
-          DrawText(waitText, GetScreenWidth() / 2 - MeasureText(waitText, waitTextFontSize) / 2, 
-                   GetScreenHeight() / 2 + 60, waitTextFontSize, GRAY);
+          DrawTexture(texLogo, screenWidth / 2 - texLogo.width / 2, screenHeight / 2 - texLogo.height / 2, WHITE);
         } break;
         case TITLE:
         {
           // TODO: Draw TITLE screen here!
           DrawRectangle(0, 0, screenWidth, screenHeight, GREEN);
-          DrawText("TITLE", 20, 20, 40, DARKGREEN);
+          DrawTextEx(font, "PONG XP", (Vector2){ 100, 80 }, 160, 10, MAROON);
           if ((framesCounter / 30) % 2 == 0)
           {
             const char *startText = "Press [ENTER] to START";
@@ -302,6 +299,8 @@ int main(void)
   // --------------------------------------------------
 
   // NOTE: Unload any loaded resources (texture, fonts, audio)
+  UnloadFont(font);
+  UnloadTexture(texLogo);
   UnloadTexture(texBall);
 
   CloseWindow(); // Close window and OpenGL context
