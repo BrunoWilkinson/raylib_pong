@@ -45,10 +45,16 @@ int main(void)
 
   InitWindow(screenWidth, screenHeight, "PROJECT: PONG");
 
-  // TODO: load resources (textures, font, audio) after Window initialization
   Font font = LoadFont(ASSETS_PATH"setback.png");
+
   Texture2D texLogo = LoadTexture(ASSETS_PATH"logo.png");
   Texture2D texBall = LoadTexture(ASSETS_PATH"ball.png");
+
+  InitAudioDevice();
+  Sound fxStart = LoadSound(ASSETS_PATH"start.wav");
+  Sound fxBounce = LoadSound(ASSETS_PATH"bounce.wav");
+  Music music = LoadMusicStream(ASSETS_PATH"blockshock.mod");
+  PlayMusicStream(music);
 
   GameScreen screen = LOGO; // Current game state
 
@@ -56,8 +62,6 @@ int main(void)
   int ballFramesCounter = 0; // Frames counter for the ball
   int gameResult = -1;  // Game result: 0 - Loose, 1 - Win, -1 - Not Defined
   bool gamePaused = false; // Game pause toggle state
-
-  // TODO: Define and Initialize game variables
 
   // NOTE: Check defined structs on top
   Player player1 = { 0 };
@@ -107,6 +111,7 @@ int main(void)
           if (IsKeyPressed(KEY_ENTER))
           {
             screen = GAMEPLAY;
+            PlaySound(fxStart);
           }
         } break;
       case GAMEPLAY:
@@ -157,6 +162,7 @@ int main(void)
               {
                 ball.speed.y = (ball.position.y - (player1.position.y + player1.size.y / 2)) / player1.size.y * 5.0f;
                 ball.speed.x *= -1;
+                PlaySound(fxBounce);
               }
 
               // Game ending logic
@@ -213,6 +219,8 @@ int main(void)
         } break;
       default: break;
     }
+
+    UpdateMusicStream(music);
     // --------------------------------------------------
 
     // Draw
@@ -300,8 +308,13 @@ int main(void)
 
   // NOTE: Unload any loaded resources (texture, fonts, audio)
   UnloadFont(font);
+
   UnloadTexture(texLogo);
   UnloadTexture(texBall);
+
+  UnloadSound(fxStart);
+  UnloadSound(fxBounce);
+  UnloadMusicStream(music);
 
   CloseWindow(); // Close window and OpenGL context
   // --------------------------------------------------
